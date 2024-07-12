@@ -26,7 +26,7 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ message: 'User already exists.' });
       }
   
-      const activationToken = jwt.sign({ email }, 'secret', { expiresIn: '1d' });
+      const activationToken = jwt.sign({ email }, 'process.env.KEY', { expiresIn: '1d' });
       const hashedPassword = await bcrypt.hash(password, 10);
       const newUser = new User({ firstName, lastName, email, password: hashedPassword, activationToken });
   
@@ -52,7 +52,7 @@ router.post('/register', async (req, res) => {
   
     try {
       // console.log('Received token:', token);
-      const decoded = jwt.verify(token, 'secret');
+      const decoded = jwt.verify(token, 'process.env.KEY');
       // console.log('Decoded token:', decoded);
       const user = await User.findOne({ email: decoded.email });
   
@@ -113,7 +113,7 @@ router.post('/forgot-password', async (req, res) => {
       return res.status(400).json({ message: 'User not found.' });
     }
 
-    const resetToken = jwt.sign({ id: user._id }, 'secret', { expiresIn: '1h' });
+    const resetToken = jwt.sign({ id: user._id }, 'process.env.KEY', { expiresIn: '1h' });
     user.resetToken = resetToken;
 
     await user.save();
@@ -137,7 +137,7 @@ router.post('/reset-password/:token', async (req, res) => {
   const { password } = req.body;
 
   try {
-    const decoded = jwt.verify(token, 'secret');
+    const decoded = jwt.verify(token, 'process.env.KEY');
     const user = await User.findOne({ _id: decoded.id, resetToken: token });
 
     if (!user) {
